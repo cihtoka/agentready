@@ -1,0 +1,34 @@
+<html>
+<head><title>untitled</title></head>
+<body>
+<div class="header" style="background:#e33;color:#fff;padding:8px">
+  <font size="5"><b>오늘마켓</b></font>
+  <div class="search">
+    <input type="text" id="q" placeholder="뭐 찾으세요?">
+    <div class="btn" onclick="doSearch()">검색</div>
+  </div>
+</div>
+<div class="gnb">
+  <span onclick="location.href='index.html'">홈</span> |
+  <span onclick="location.href='product.html'">베스트</span> |
+  <span onclick="location.href='cart.html'">장바구니</span>
+</div>
+<div class="contents">
+  <div class="tit">무선 청소기 A200</div>
+  <img src="img/p1_big.jpg" width="300">
+  <img src="img/p1_s1.jpg" width="60"> <img src="img/p1_s2.jpg" width="60">
+  <div class="prc">129000</div>
+  <div>배송비 무료 / 오늘 주문 시 내일 도착</div>
+  <div>
+    색상 <select><option>선택하세요</option><option>화이트</option><option>그레이</option></select>
+    수량 <input type="text" value="1" size="2">
+  </div>
+  <span class="btn" onclick="addCart()">장바구니 담기</span>
+  <span class="btn" onclick="buyNow()">바로구매</span>
+</div>
+<div class="footer">오늘마켓 | 사업자등록번호 000-00-00000 | 고객센터 1588-0000</div>
+<div class="popup" style="position:fixed;top:30%;left:20%;width:60%;background:#fff;border:2px solid #e33;z-index:999;padding:20px">★ 오늘만 신규 가입 쿠폰 증정 ★ (창 밖을 누르면 닫힙니다)</div>
+<div class="cookie" style="position:fixed;bottom:0;left:0;right:0;background:#333;color:#fff;padding:8px">이 사이트는 쿠키를 사용합니다.</div>
+<script>function addCart(){alert('담았습니다')} function buyNow(){} function doSearch(){}</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>untitled</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>.btn{background:#e33;color:#fff;padding:4px 10px;cursor:pointer}.prc{color:#e33;font-weight:bold}.item{display:inline-block;margin:8px;cursor:pointer}</style>
+</head>
+<body>
+<div class="header" style="background:#e33;color:#fff;padding:8px">
+  <font size="5"><b>오늘마켓</b></font>
+  <div class="search">
+    <input type="text" id="q" placeholder="뭐 찾으세요?">
+    <div class="btn" onclick="doSearch()">검색</div>
+  </div>
+</div>
+<div class="gnb">
+  <span onclick="location.href='index.html'">홈</span> |
+  <span onclick="location.href='product.html'">베스트</span> |
+  <span onclick="location.href='cart.html'">장바구니</span>
+</div>
+<div class="contents">
+  <div class="tit">오늘의 특가</div>
+  <div class="item" onclick="location.href='product.html'">
+    <img src="img/p1.jpg" width="120"><br>무선 청소기 A200<br><div class="prc">129000</div>
+  </div>
+  <div class="item" onclick="location.href='product.html'">
+    <img src="img/p2.jpg" width="120"><br>스테인리스 텀블러<br><div class="prc">15900</div>
+  </div>
+  <div class="item" onclick="location.href='product.html'">
+    <img src="img/p3.jpg" width="120"><br>접이식 캠핑 의자<br><div class="prc">32000</div>
+  </div>
+</div>
+<div class="footer">오늘마켓 | 사업자등록번호 000-00-00000 | 고객센터 1588-0000</div>
+<div class="popup" style="position:fixed;top:30%;left:20%;width:60%;background:#fff;border:2px solid #e33;z-index:999;padding:20px">★ 오늘만 신규 가입 쿠폰 증정 ★ (창 밖을 누르면 닫힙니다)</div>
+<div class="cookie" style="position:fixed;bottom:0;left:0;right:0;background:#333;color:#fff;padding:8px">이 사이트는 쿠키를 사용합니다.</div>
+<script>function doSearch(){alert('검색')}</script>
+</body>
+</html>

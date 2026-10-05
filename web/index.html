@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentReady</title>
+<style>
+:root{
+  --paper:#F4F5F8; --surface:#FFFFFF; --ink:#16203A; --ink2:#4A566D; --mute:#7A869A; --line:#DDE2EA; --line2:#EBEEF3;
+  --agent:#5B5BD6; --agent-soft:#ECECFB; --ok:#0E9F6E; --ok-soft:#E1F5EC; --bad:#E5484D; --bad-soft:#FDECEC; --warn:#C77F08; --warn-soft:#FFF2D9;
+  --font:"Pretendard Variable",Pretendard,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#0E131F; --surface:#161D2C; --ink:#E8ECF4; --ink2:#B3BDCE; --mute:#8794A9; --line:#2A3448; --line2:#202A3B;
+  --agent:#8F8FF2; --agent-soft:#22264A; --ok:#34D399; --ok-soft:#11332A; --bad:#FF7A7E; --bad-soft:#3A1C20; --warn:#F2B24B; --warn-soft:#3A2C12;
+}}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--agent);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- 상단 바 ---------- */
+.top{height:54px;display:flex;align-items:center;gap:14px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;letter-spacing:-.02em}
+.brand svg{width:26px;height:26px}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);font-size:12.5px;color:var(--ink2)}
+.pill:hover{border-color:var(--agent)}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.pill.ok i{background:var(--ok)}.pill.bad i{background:var(--bad)}
+
+/* ---------- 레이아웃 ---------- */
+.app{display:grid;grid-template-columns:316px minmax(0,1fr);min-height:calc(100vh - 54px)}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:20px 18px;display:flex;flex-direction:column;gap:18px}
+.rail h2{margin:0 0 8px;font-size:12.5px;font-weight:700;color:var(--mute);letter-spacing:.01em}
+.samples{display:flex;flex-direction:column;gap:2px}
+.sample{position:relative;display:grid;grid-template-columns:10px 1fr;gap:10px;padding:10px 10px 10px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.sample:hover{background:var(--paper)}
+.sample input{position:absolute;opacity:0}
+.sample:has(input:checked){background:var(--agent-soft);border-color:color-mix(in srgb,var(--agent) 35%,transparent)}
+.sample:has(input:focus-visible){outline:2px solid var(--agent)}
+.sample .dot{width:10px;height:10px;border-radius:50%;margin-top:6px}
+.sample b{display:block;font-size:14px;font-weight:650;line-height:1.35}
+.sample small{display:block;color:var(--ink2);font-size:12.5px}
+.sample small em{font-style:normal;color:var(--bad)}
+.rail details{border-top:1px solid var(--line2);padding-top:14px}
+.rail summary{cursor:pointer;font-weight:650;font-size:13.5px;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.rail summary::after{content:"+";color:var(--mute);font-size:16px}
+.rail details[open] summary::after{content:"–"}
+.field{display:flex;flex-direction:column;gap:5px;margin-top:12px;font-size:12.5px;color:var(--ink2)}
+.in{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+textarea.in{min-height:84px;resize:vertical;font:12px/1.4 ui-monospace,Consolas,monospace}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 16px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:650}
+.btn:hover{border-color:var(--agent)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:var(--surface);width:100%;min-height:46px;font-size:15px}
+.btn.primary:hover{background:var(--agent);border-color:var(--agent);color:#fff}
+.btn:disabled{opacity:.55;cursor:default}
+.switch{display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer}
+.switch input{appearance:none;flex:none;width:36px;height:20px;border-radius:10px;background:var(--line);position:relative;margin:2px 0 0;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked{background:var(--agent)}.switch input:checked::after{transform:translateX(16px)}
+.switch small{display:block;color:var(--mute);font-size:12px;line-height:1.4}
+.rail .push{margin-top:auto;display:flex;flex-direction:column;gap:14px}
+
+/* ---------- 메인 ---------- */
+.main{min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:18px 28px 0}
+.head h1{margin:0;font-size:20px;letter-spacing:-.02em}
+.head .sp{flex:1}
+.seg{display:inline-flex;padding:3px;background:var(--line2);border-radius:10px}
+.seg button{border:0;background:transparent;padding:6px 16px;border-radius:8px;font-weight:650;color:var(--ink2)}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,30,60,.12)}
+.seg button:disabled{opacity:.45;cursor:default}
+
+.journey{padding:22px 28px 6px}
+.journey h2{margin:0;font-size:24px;line-height:1.3;letter-spacing:-.02em;font-weight:750}
+.journey h2.ok{color:var(--ok)}.journey h2.bad{color:var(--bad)}
+.journey .sub{margin:4px 0 22px;color:var(--ink2);font-size:13.5px}
+.nodes{list-style:none;margin:0;padding:0;display:flex}
+.nodes li{position:relative;flex:1;min-width:0;padding-right:10px}
+.nodes li::before{content:"";position:absolute;top:17px;left:-50%;right:50%;height:3px;background:var(--line);border-radius:2px}
+.nodes li:first-child::before{display:none}
+.nodes li.ok::before,.nodes li.warn::before,.nodes li.fail::before{background:var(--ok)}
+.nodes li.fail::before{background:linear-gradient(90deg,var(--ok),var(--bad))}
+.nodes .dot{position:relative;z-index:1;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;font-weight:800;font-size:16px;border:3px solid var(--line);background:var(--surface);color:var(--mute)}
+.nodes li.ok .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.nodes li.warn .dot{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.nodes li.fail .dot{background:var(--bad);border-color:var(--bad);color:#fff}
+.nodes li.na .dot{border-style:dashed}
+.nodes b{display:block;margin-top:9px;font-size:13.5px;font-weight:700}
+.nodes small{display:block;margin-top:2px;color:var(--ink2);font-size:12px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nodes.anim li .dot{animation:pop .42s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i)*140ms)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+
+.meter{display:flex;align-items:center;gap:16px;margin:24px 28px 0;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.meter .lab{font-size:13px;color:var(--ink2);font-weight:650;white-space:nowrap}
+.meter .num{font-size:30px;font-weight:800;letter-spacing:-.03em;min-width:78px;text-align:right}
+.meter .num small{font-size:13px;color:var(--mute);font-weight:600;margin-left:3px}
+.track{position:relative;flex:1;height:10px;background:var(--line2);border-radius:6px;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;border-radius:6px;transition:width .9s cubic-bezier(.2,.8,.2,1),background .3s}
+.delta{min-width:74px;text-align:center;padding:3px 10px;border-radius:12px;background:var(--ok-soft);color:var(--ok);font-weight:750;font-size:13px}
+
+.banner{margin:14px 28px 0;padding:11px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-radius:10px;background:var(--warn-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);font-size:13px}
+.meter.ext{margin-top:0;border-top:0;padding-top:0}.meter .lab small{display:block;font-weight:600;color:var(--mute);font-size:11px}
+.banner.manual{background:var(--agent-soft);border-color:color-mix(in srgb,var(--agent) 35%,transparent)}
+.grp{margin:14px 0 2px;font-size:12px;font-weight:750;color:var(--mute);letter-spacing:.01em}.grp em{font-style:normal;font-weight:600;margin-left:6px}
+.chk .nm .mn{margin-left:6px;font-size:11px;font-weight:700;padding:1px 7px;border-radius:9px;background:var(--agent-soft);color:var(--agent)}
+.chk .guide{background:var(--agent-soft);color:var(--ink)}.chk .guide b{color:var(--agent)}
+.banner .btn{min-height:32px;padding:0 12px;font-size:13px}
+
+.work{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:22px;padding:20px 28px 40px;align-items:start}
+.frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.frame .bar{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--line2)}
+.frame .bar .url{flex:1;min-width:0;padding:5px 12px;border-radius:14px;background:var(--surface);color:var(--ink2);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frame .bar select{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 8px;font-size:12.5px}
+.frame .tag{font-size:12px;font-weight:750;padding:2px 9px;border-radius:10px;background:var(--bad-soft);color:var(--bad)}
+.frame .tag.after{background:var(--ok-soft);color:var(--ok)}
+iframe{display:block;width:100%;height:560px;border:0;background:#fff}
+
+.panel{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;padding:12px 4px;font-size:13px;border:0;background:transparent;font-weight:650;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--agent)}
+.pane{padding:6px 16px 16px;max-height:600px;overflow:auto}
+.empty{padding:30px 6px;color:var(--ink2);text-align:center;font-size:13.5px}
+.chk{border-bottom:1px solid var(--line2)}
+.chk summary{display:grid;grid-template-columns:minmax(0,1fr) 76px 104px;gap:10px;align-items:center;padding:11px 0;cursor:pointer;list-style:none;font-size:13px}
+.chk summary::-webkit-details-marker{display:none}
+.chk .nm{font-weight:650}
+.chk .bars{display:grid;gap:3px}
+.chk .tr{height:5px;border-radius:3px;background:var(--line2);overflow:hidden}
+.chk .tr i{display:block;height:100%;border-radius:3px}
+.chk .b{background:var(--bad)}.chk .a{background:var(--ok)}
+.chk .pt{text-align:right;white-space:nowrap;color:var(--ink2);font-size:12.5px}.chk .pt b{color:var(--ok)}.chk .pt em{font-style:normal;color:var(--mute)}
+.chk p{margin:0 0 12px;padding:9px 11px;border-radius:8px;background:var(--paper);color:var(--ink2);font-size:12.5px}
+.tl{list-style:none;margin:8px 0 0;padding:0 0 0 18px;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:0 0 14px 14px}
+.tl li::before{content:"";position:absolute;left:-25px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--mute);border:2px solid var(--surface)}
+.tl li.think::before,.tl li.tool::before{background:var(--agent)}.tl li.approval::before{background:var(--warn)}
+.tl li.error::before{background:var(--bad)}.tl li.done::before,.tl li.decide::before{background:var(--ok)}
+.tl b{font-size:13px}.tl .k{margin-left:6px;font-size:11.5px;color:var(--mute);font-weight:600}
+.tl pre{margin:3px 0 0;white-space:pre-wrap;word-break:break-word;font:12px/1.5 var(--font);color:var(--ink2)}
+.diff summary{cursor:pointer;padding:10px 0;font-weight:650;font-size:13px;border-bottom:1px solid var(--line2)}
+pre.d{margin:8px 0 12px;max-height:280px;overflow:auto;padding:10px;border-radius:8px;background:var(--paper);font:11.5px/1.5 ui-monospace,Consolas,monospace}
+.add{color:var(--ok)}.del{color:var(--bad)}
+.ev{padding:12px 0;border-bottom:1px solid var(--line2)}.ev h4{margin:0 0 4px;font-size:13.5px}
+.tagr{margin-left:8px;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:9px;background:var(--agent-soft);color:var(--agent)}.tagr.weak{background:var(--warn-soft);color:var(--warn)}
+.ev .q{margin:0 0 8px;font-size:12px;color:var(--mute);word-break:break-all}
+.hit{padding:8px 10px;margin-bottom:6px;border-radius:8px;border:1px solid var(--line2)}.hit.best{border-color:color-mix(in srgb,var(--agent) 45%,transparent);background:var(--agent-soft)}
+.hit .hh{display:flex;align-items:center;gap:8px;font-size:12.5px}.hit .hh b{flex:none}.hit .tt{flex:1;min-width:0}.hit .hh em{flex:none}.hit .hh em{font-style:normal;color:var(--mute);font-size:12px}
+.hit .sc{flex:0 0 46px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}.hit .sc i{display:block;height:100%;background:var(--agent)}
+.hit p{margin:5px 0 0;font-size:12px;color:var(--ink2);line-height:1.5}
+.summary{margin:0 0 8px;padding:12px 4px 4px;font-size:13px;color:var(--ink2)}
+
+/* ---------- LLM 설정 ---------- */
+dialog{width:min(560px,92vw);padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,15,30,.5)}
+dialog form{padding:22px;display:flex;flex-direction:column;gap:2px}
+dialog h3{margin:0 0 4px;font-size:17px}
+dialog .note{margin:0 0 6px;color:var(--ink2);font-size:12.5px}
+dialog .row{display:flex;gap:10px}dialog .row>*{flex:1}
+dialog .res{margin-top:12px;font-size:13px;min-height:20px;word-break:break-all;color:var(--ink2)}
+dialog .foot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:min(620px,92vw);padding:11px 16px;border-radius:10px;background:var(--bad);color:#fff;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:20}
+
+@media (max-width:1040px){
+  .app{grid-template-columns:1fr}.rail{border-right:0;border-bottom:1px solid var(--line)}
+  .work{grid-template-columns:1fr}.head,.journey,.work{padding-left:18px;padding-right:18px}.meter,.banner{margin-left:18px;margin-right:18px}
+}
+@media (max-width:640px){
+  .nodes{flex-direction:column;gap:14px}.nodes li{padding-left:50px;padding-right:0}.nodes li::before{display:none}
+  .nodes .dot{position:absolute;left:0;top:0}.nodes b{margin-top:0}.journey h2{font-size:20px}
+  .meter{flex-wrap:wrap}iframe{height:420px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="var(--ink)"/><path d="M7 15.5l4.2 4.2L21 9.5" fill="none" stroke="var(--surface)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    AgentReady
+  </div>
+  <span class="sp"></span>
+  <button class="pill" id="llmPill" aria-haspopup="dialog"><i></i><span id="llmText">LLM</span></button>
+</header>
+
+<div class="app">
+  <aside class="rail" aria-label="분석 설정">
+    <section>
+      <h2>분석할 사이트</h2>
+      <div class="samples" id="samples" role="radiogroup" aria-label="샘플 사이트"></div>
+    </section>
+    <details id="custom">
+      <summary>다른 페이지 분석</summary>
+      <label class="field">URL
+        <input class="in" id="url" type="url" placeholder="https://… (상품 상세 페이지)">
+      </label>
+      <label class="field">또는 HTML 붙여넣기
+        <textarea class="in" id="paste" placeholder="F12 → Elements → &lt;html&gt; 우클릭 → Copy → Copy outerHTML"></textarea>
+      </label>
+      <label class="field">또는 HTML 파일
+        <input class="in" id="file" type="file" accept=".html,.htm">
+      </label>
+      <p class="field" style="margin-top:8px;font-size:12px;color:var(--mute)">스크립트와 스타일은 전송 전에 브라우저에서 제거돼요.</p>
+      <button class="btn" id="scanBtn" style="margin-top:10px;width:100%">불러와서 진단</button>
+    </details>
+    <div class="push">
+      <label class="switch">
+        <input type="checkbox" id="approve" checked>
+        <span>고위험 수정도 자동 승인<small>끄면 DOM 구조 변경·재고 추정 같은 수정은 승인 대기로 남아요.</small></span>
+      </label>
+      <button class="btn primary" id="run" disabled>개선 시작</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="head">
+      <h1 id="siteName">사이트를 불러오는 중…</h1>
+      <span class="sp"></span>
+      <div class="seg" role="group" aria-label="보기 전환">
+        <button id="vb" aria-pressed="true">개선 전</button>
+        <button id="va" aria-pressed="false" disabled>개선 후</button>
+      </div>
+    </div>
+
+    <section class="journey" aria-live="polite">
+      <h2 id="jTitle">&nbsp;</h2>
+      <p class="sub" id="jSub"></p>
+      <ol class="nodes" id="nodes"></ol>
+    </section>
+
+    <div class="meter" id="coreMeter">
+      <span class="lab">구조 점수<small>읽기·조작</small></span>
+      <span class="num"><span id="num">0</span><small>/ 100</small></span>
+      <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar"><i id="fill"></i></div>
+      <span class="delta" id="delta" hidden></span>
+    </div>
+
+    <div class="meter ext" title="후보에 오르고 선택·완료까지 가는지에 대한 추론 기반 지표입니다. 가중치는 실제 에이전트 실험으로 검증하기 전의 추정값입니다.">
+      <span class="lab">선택 지표<small>추론 기반</small></span>
+      <span class="num"><span id="xnum">0</span><small>/ 100</small></span>
+      <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="xbar"><i id="xfill"></i></div>
+      <span class="delta" id="xdelta" hidden></span>
+    </div>
+
+    <div class="banner" id="banner" hidden></div>
+    <div class="banner manual" id="manualBanner" hidden></div>
+
+    <div class="work">
+      <div class="frame">
+        <div class="bar">
+          <span class="tag" id="tag">개선 전</span>
+          <span class="url" id="urlbar"></span>
+          <select id="page" aria-label="페이지 선택"></select>
+        </div>
+        <iframe id="view" sandbox title="사이트 미리보기"></iframe>
+      </div>
+
+      <div class="panel">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="checks">점검 항목</button>
+          <button role="tab" aria-selected="false" data-tab="rag">검색 근거</button>
+          <button role="tab" aria-selected="false" data-tab="trace">판단 과정</button>
+          <button role="tab" aria-selected="false" data-tab="diff">수정 내역</button>
+        </div>
+        <div class="pane" id="p-checks"></div>
+        <div class="pane" id="p-rag" hidden></div>
+        <div class="pane" id="p-trace" hidden></div>
+        <div class="pane" id="p-diff" hidden></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="cfg">
+  <form method="dialog" id="cfgForm" onsubmit="return false">
+    <h3>LLM 설정</h3>
+    <p class="note">키는 서버 메모리에만 유지되고 파일로 저장되지 않아요. 서버를 끄면 다시 입력해야 해요.</p>
+    <label class="field">제공자
+      <select class="in" id="cprov">
+        <option value="mock">Mock (외부 호출 없음)</option>
+        <option value="openai">OpenAI 호환 (Gemini, Groq 등)</option>
+        <option value="anthropic">Claude (Anthropic)</option>
+        <option value="replay">Replay (녹화 재생)</option>
+      </select>
+    </label>
+    <label class="field" id="fpreset">주소 프리셋
+      <select class="in" id="cpreset"><option value="">직접 입력</option><option value="gemini">Google Gemini</option><option value="groq">Groq</option><option value="openrouter">OpenRouter</option><option value="openai">OpenAI</option><option value="ollama">Ollama (로컬)</option></select>
+    </label>
+    <label class="field" id="furl">API 주소<input class="in" id="curl" placeholder="https://…/v1"></label>
+    <div class="row">
+      <label class="field" id="fmodel">모델명<input class="in" id="cmodel" placeholder="모델 ID"></label>
+      <label class="field" id="fkey">API 키<input class="in" id="ckey" type="password" autocomplete="off" placeholder="API 키"></label>
+    </div>
+    <label class="switch" id="frec" style="margin-top:12px"><input type="checkbox" id="crec"><span>응답 녹화<small>내부망 시연용으로 실제 응답을 data/recordings 에 저장해요.</small></span></label>
+    <div class="res" id="cres" role="status"></div>
+    <div class="foot">
+      <button class="btn" id="cclose" type="button">닫기</button>
+      <button class="btn" id="capply" type="button" style="background:var(--ink);color:var(--surface);border-color:var(--ink)">적용하고 연결 테스트</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="alert" hidden></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>(Math.round(n*10)/10).toString();
+const HDR={"Content-Type":"application/json","X-AgentReady":"1"};
+const GLYPH={ok:"✓",warn:"!",fail:"✕",skipped:"–",na:"–"};
+const STATE_KO={ok:"성공",warn:"주의",fail:"실패",skipped:"건너뜀",na:"해당 없음"};
+const KIND_KO={observe:"진단",think:"판단",tool:"실행",decide:"결정",approval:"승인",error:"오류",done:"완료"};
+const PRESETS={gemini:"https://generativelanguage.googleapis.com/v1beta/openai/",groq:"https://api.groq.com/openai/v1",openrouter:"https://openrouter.ai/api/v1",openai:"https://api.openai.com/v1",ollama:"http://localhost:11434/v1"};
+
+let samples=[], payload=null, scanData=null, R=null, side="before", upload=null, shown=0, shownX=0;
+
+function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,6500);}
+async function api(path,body){
+  const r=await fetch(path,body?{method:"POST",headers:HDR,body:JSON.stringify(body)}:undefined);
+  const d=await r.json(); if(d.error) throw new Error(d.error); return d;
+}
+function band(score){return score>=80?"var(--ok)":score>=40?"var(--warn)":"var(--bad)";}
+
+/* ---------- 샘플 목록 ---------- */
+function renderSamples(){
+  $("samples").innerHTML=samples.map(s=>`
+    <label class="sample"><input type="radio" name="sample" value="${esc(s.id)}" ${payload&&payload.site===s.id?"checked":""}>
+      <span class="dot" style="background:${band(s.score)}"></span>
+      <span><b>${esc(s.label)}</b><small>${fmt(s.score)}점 · ${s.blocked_at?`<em>${esc(s.blocked_at)}에서 막힘</em>`:"끝까지 통과"}</small></span></label>`).join("");
+  document.querySelectorAll('input[name=sample]').forEach(i=>i.onchange=()=>choose({site:i.value}));
+}
+async function choose(p){
+  payload=p; R=null; side="before";
+  $("run").disabled=true; $("siteName").textContent="진단 중…";
+  try{ scanData=await api("/api/scan",p); }catch(e){ toast("진단 실패: "+e.message); $("siteName").textContent="진단하지 못했어요"; return; }
+  $("run").disabled=false; render(false);
+}
+
+/* ---------- 렌더링 ---------- */
+function view(){
+  return R?{before:R.before,after:R.after,simB:R.sim_before,simA:R.sim_after,pagesB:R.pages_before,pagesA:R.pages_after}
+          :{before:scanData.before,after:null,simB:scanData.sim_before,simA:null,pagesB:scanData.pages_before,pagesA:null};
+}
+function setSide(s,anim){side=s;render(anim);}
+function render(anim){
+  const v=view(), name=R?R.site:scanData.site, sim=side==="after"&&v.simA?v.simA:v.simB, score=side==="after"&&v.after?v.after.total:v.before.total;
+  $("siteName").textContent=name;
+  $("vb").setAttribute("aria-pressed",side==="before"); $("va").setAttribute("aria-pressed",side==="after"); $("va").disabled=!R;
+  // 여정(핵심 영역)
+  const fail=sim.steps.find(s=>s.status==="fail"), warn=sim.steps.filter(s=>s.status==="warn").length;
+  const passed=sim.steps.filter(s=>s.status==="ok"||s.status==="warn").length, scored=sim.steps.filter(s=>s.status!=="na").length;
+  const jt=$("jTitle");
+  jt.className=fail?"bad":"ok";
+  jt.textContent=fail?`쇼핑 에이전트가 ‘${fail.name}’에서 멈췄어요`:`쇼핑 에이전트가 장보기를 끝까지 마쳤어요`;
+  $("jSub").textContent=`완료율 ${Math.round(sim.completion*100)}% · ${scored}단계 중 ${passed}단계 통과${warn?` (주의 ${warn})`:""}`;
+  $("nodes").className="nodes"+(anim?" anim":"");
+  $("nodes").innerHTML=sim.steps.map((s,i)=>`<li class="${s.status}" style="--i:${i}" title="${esc(s.message)}"><span class="dot" aria-hidden="true">${GLYPH[s.status]}</span><b>${esc(s.name)}<span class="sr"> ${STATE_KO[s.status]}</span></b><small>${esc(s.message)}</small></li>`).join("");
+  // 점수
+  const fill=$("fill"); fill.style.background=band(score); fill.style.width=score+"%"; $("bar").setAttribute("aria-valuenow",score);
+  countTo($("num"),shown,score,anim?900:0); shown=score;
+  const d=$("delta"); if(R&&side==="after"){d.hidden=false;d.textContent=`+${fmt(R.after.total-R.before.total)}`;}else d.hidden=true;
+  const xs=side==="after"&&v.after?v.after.ext_total:v.before.ext_total;
+  const xf=$("xfill"); xf.style.background=band(xs); xf.style.width=xs+"%"; $("xbar").setAttribute("aria-valuenow",xs);
+  countTo($("xnum"),shownX,xs,anim?900:0); shownX=xs;
+  const xd=$("xdelta"); if(R&&side==="after"){const dx=R.after.ext_total-R.before.ext_total;xd.hidden=false;xd.textContent=(dx>=0?"+":"")+fmt(dx);}else xd.hidden=true;
+  // 직접 조치 필요
+  const mb=$("manualBanner");
+  if(R&&R.manual&&R.manual.length){mb.hidden=false;mb.innerHTML=`<span><b>직접 조치가 필요한 항목 ${R.manual.length}건</b> · ${R.manual.map(m=>esc(m.name)).join(", ")} <small>(자동 수정 도구가 없어 ‘점검 항목’ 탭에서 조치 가이드를 확인하세요)</small></span>`;}else mb.hidden=true;
+  // 배너(승인 대기)
+  const b=$("banner");
+  if(R&&R.pending.length){b.hidden=false;b.innerHTML=`<span><b>승인 대기 ${R.pending.length}건</b> · ${R.pending.map(esc).join(", ")}</span><button class="btn" id="reapprove">자동 승인하고 다시 개선</button>`;
+    $("reapprove").onclick=()=>{$("approve").checked=true;runAgent();};}else b.hidden=true;
+  // 미리보기
+  const pages=Object.keys(v.pagesB), cur=$("page").value&&pages.includes($("page").value)?$("page").value:(pages.includes("index.html")?"index.html":pages[0]);
+  $("page").innerHTML=pages.map(p=>`<option ${p===cur?"selected":""}>${esc(p)}</option>`).join("");
+  drawPreview();
+  $("p-checks").innerHTML=(R?`<p class="summary">${esc(R.summary)}</p>`:"")+checkRows();
+  $("p-rag").innerHTML=R?ragRows():`<div class="empty">개선을 시작하면 에이전트가 진단 내용으로 가이드라인을 검색한 근거가 여기에 나와요.</div>`;
+  $("p-trace").innerHTML=R?traceRows():`<div class="empty">‘개선 시작’을 누르면 에이전트가 무엇을 보고 어떻게 판단했는지 여기에 쌓여요.</div>`;
+  $("p-diff").innerHTML=R?diffRows():`<div class="empty">에이전트가 고친 부분이 여기에 줄 단위로 표시돼요.</div>`;
+}
+function drawPreview(){
+  const v=view(), p=$("page").value, after=side==="after"&&v.pagesA;
+  $("view").srcdoc=(after?v.pagesA:v.pagesB)[p]||"<p style='font:14px sans-serif;padding:16px'>페이지가 없어요.</p>";
+  const t=$("tag"); t.textContent=after?"개선 후":"개선 전"; t.className="tag"+(after?" after":"");
+  $("urlbar").textContent=(R?R.site:scanData.site)+" / "+p;
+}
+function countTo(el,from,to,ms){
+  if(!ms){cancelAnimationFrame(el._raf);el.textContent=fmt(to);return;}
+  const t0=performance.now(); cancelAnimationFrame(el._raf);
+  const step=t=>{const k=Math.min(1,(t-t0)/ms), e=1-Math.pow(1-k,3); el.textContent=fmt(from+(to-from)*e); if(k<1) el._raf=requestAnimationFrame(step);};
+  el._raf=requestAnimationFrame(step);
+}
+function checkRows(){
+  const v=view(), a=v.after?Object.fromEntries(v.after.checks.map(c=>[c.id,c])):null;
+  const ev=R?Object.fromEntries(R.evidence.map(e=>[e.check_id,e])):{};
+  const row=c=>{const af=a?a[c.id]:null, now=af||c, open=R&&c.manual&&now.score<0.95;
+    const hit=open&&ev[c.id]&&ev[c.id].hits[0];
+    const guide=hit?`<p class="guide"><b>조치 가이드 [${esc(hit.id)}]</b> ${esc(hit.text)}</p>`:"";
+    return `<details class="chk"${open?" open":""}><summary><span class="nm">${esc(c.name)}${c.manual?`<span class="mn">직접 조치</span>`:""}</span>
+      <span class="bars"><span class="tr"><i class="b" style="width:${c.score*100}%"></i></span>${af?`<span class="tr"><i class="a" style="width:${af.score*100}%"></i></span>`:""}</span>
+      <span class="pt">${fmt(c.score*c.weight)}${af?` → <b>${fmt(af.score*af.weight)}</b>`:""}<em> / ${c.weight}</em></span></summary><p>${esc(c.detail)}</p>${guide}</details>`;};
+  const core=v.before.checks.filter(c=>c.group==="core"), ext=v.before.checks.filter(c=>c.group==="ext");
+  return `<div class="grp">구조 점검<em>읽히고 조작되는가</em></div>`+core.map(row).join("")+
+         `<div class="grp">선택 지표<em>추론 기반 · 실험으로 검증 예정</em></div>`+ext.map(row).join("");
+}
+function ragRows(){
+  const head=`<p class="summary">검색 방식: ${esc(R.rag.mode)}${R.rag.dense_error?` · 임베딩 사용 불가(${esc(R.rag.dense_error.slice(0,80))})`:""}</p>`;
+  return head+R.evidence.map(e=>`<section class="ev"><h4>${esc(e.check_name)}${e.retries?`<span class="tagr">재검색</span>`:""}${e.graded==="weak"?`<span class="tagr weak">신뢰도 낮음</span>`:""}</h4>
+    <p class="q">검색어: ${esc(e.queries.join("  →  "))}</p>
+    ${e.hits.map((h,i)=>`<div class="hit${i===0?" best":""}"><div class="hh"><b>[${esc(h.id)}]</b><span class="tt">${esc(h.title)}</span><span class="sc"><i style="width:${Math.min(100,h.score*100)}%"></i></span><em>${h.score}</em></div><p>${esc(h.text)}</p></div>`).join("")}</section>`).join("");
+}
+function traceRows(){
+  return `<ol class="tl">`+R.trace.map(e=>`<li class="${e.kind}"><b>${esc(e.title)}</b><span class="k">${KIND_KO[e.kind]||""}</span>${e.detail?`<pre>${esc(e.detail)}</pre>`:""}</li>`).join("")+`</ol>`;
+}
+function diffRows(){
+  const ks=Object.keys(R.diffs); if(!ks.length) return `<div class="empty">변경 사항이 없어요.</div>`;
+  return `<div class="diff">`+ks.map(k=>`<details><summary>${esc(k)}</summary><pre class="d">${R.diffs[k].split("\n").map(l=>`<span class="${l[0]==="+"&&l[1]!=="+"?"add":l[0]==="-"&&l[1]!=="-"?"del":""}">${esc(l)}</span>`).join("\n")}</pre></details>`).join("")+`</div>`;
+}
+
+/* ---------- 실행 ---------- */
+async function runAgent(){
+  if(!payload) return;
+  const b=$("run"); b.disabled=true; b.textContent="개선 중…";
+  $("p-trace").innerHTML=`<div class="empty">에이전트가 진단하고 수정하는 중이에요…</div>`; tab("trace");
+  try{
+    R=await api("/api/run",{...payload,auto_approve:$("approve").checked});
+    side="after"; render(true); tab("trace");
+  }catch(e){ toast("실행 오류: "+e.message); render(false); }
+  b.disabled=false; b.textContent="다시 개선";
+}
+$("run").onclick=runAgent;
+$("vb").onclick=()=>setSide("before",true); $("va").onclick=()=>setSide("after",true);
+$("page").onchange=drawPreview;
+function tab(n){document.querySelectorAll(".tabs button").forEach(t=>t.setAttribute("aria-selected",t.dataset.tab===n));
+  ["checks","rag","trace","diff"].forEach(k=>$("p-"+k).hidden=k!==n);}
+document.querySelectorAll(".tabs button").forEach(t=>t.onclick=()=>tab(t.dataset.tab));
+
+/* ---------- 다른 페이지 ---------- */
+function clean(html){
+  const d=new DOMParser().parseFromString(html,"text/html");
+  d.querySelectorAll('script:not([type="application/ld+json"]),style,noscript,svg,link[rel="stylesheet"],iframe').forEach(n=>n.remove());
+  return "<!DOCTYPE html>\n"+d.documentElement.outerHTML;
+}
+$("file").onchange=async e=>{const f=e.target.files[0]; upload=f?{name:f.name,html:clean(await f.text())}:null;};
+$("scanBtn").onclick=async()=>{
+  const url=$("url").value.trim(), pasted=$("paste").value.trim();
+  let p;
+  if(url) p={url};
+  else if(pasted){const h=clean(pasted); p={name:(new DOMParser().parseFromString(h,"text/html").title||"붙여넣은 페이지").slice(0,40),html:h};}
+  else if(upload) p=upload;
+  else return toast("URL, 붙여넣은 HTML, HTML 파일 중 하나를 입력해 주세요.");
+  document.querySelectorAll('input[name=sample]').forEach(i=>i.checked=false);
+  const b=$("scanBtn"); b.disabled=true; b.textContent="불러오는 중…";
+  await choose(p); b.disabled=false; b.textContent="불러와서 진단";
+};
+
+/* ---------- LLM 설정 ---------- */
+function syncCfg(){const p=$("cprov").value, ext=p==="openai"||p==="anthropic";
+  $("fpreset").hidden=$("furl").hidden=p!=="openai"; $("fmodel").hidden=$("fkey").hidden=$("frec").hidden=!ext;}
+function showCfg(c,state){
+  $("llmText").textContent=`${c.provider}${c.model?" · "+c.model:""}`;
+  $("llmPill").className="pill"+(state||"");
+  $("cprov").value=c.provider; $("curl").value=c.provider==="openai"?c.base_url:""; $("cmodel").value=c.model; $("crec").checked=c.record;
+  $("ckey").placeholder=c.has_key?"저장됨 (바꾸려면 새로 입력)":"API 키"; syncCfg();
+}
+$("llmPill").onclick=()=>$("cfg").showModal();
+$("cclose").onclick=()=>$("cfg").close();
+$("cprov").onchange=syncCfg;
+$("cpreset").onchange=e=>{if(e.target.value)$("curl").value=PRESETS[e.target.value];};
+$("capply").onclick=async()=>{
+  const b=$("capply"), out=$("cres"); b.disabled=true; out.textContent="적용하는 중…";
+  try{
+    const c=await api("/api/llm_config",{provider:$("cprov").value,base_url:$("curl").value,model:$("cmodel").value,api_key:$("ckey").value,record:$("crec").checked});
+    $("ckey").value=""; showCfg(c); out.textContent="연결을 확인하는 중…";
+    const t=await (await fetch("/api/llm_test")).json();
+    out.textContent=t.ok?`연결됐어요 · ${t.provider} · ${t.model||"-"} · ${t.ms}ms ${t.note||""}`:"연결하지 못했어요 — "+t.error;
+    showCfg(c,t.ok?" ok":" bad");
+  }catch(e){out.textContent="적용하지 못했어요 — "+e.message;}
+  b.disabled=false;
+};
+
+/* ---------- 시작 ---------- */
+(async()=>{
+  try{
+    const d=await api("/api/sites"); samples=d.sites; showCfg(d.config);
+    if(d.config.provider==="mock") $("llmPill").className="pill";
+    payload=samples.length?{site:samples[0].id}:null; renderSamples();
+    if(payload) await choose(payload);
+  }catch(e){ toast("서버에 연결하지 못했어요: "+e.message); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+[
+ {
+  "query": "상품 상세 페이지에 상품명과 가격을 기계가 읽을 수 있게 넣으려면 어떻게 하나요",
+  "check": "jsonld"
+ },
+ {
+  "query": "schema.org Product 마크업이 없어서 에이전트가 상품 정보를 추측해요",
+  "check": "jsonld"
+ },
+ {
+  "query": "Product JSON-LD 블록 예시 코드",
+  "check": "jsonld"
+ },
+ {
+  "query": "가격이 숫자만 있고 원 표시가 없어서 정가인지 할인가인지 모르겠어요",
+  "check": "price"
+ },
+ {
+  "query": "가격을 이미지로 보여주면 에이전트가 비교를 못 하나요",
+  "check": "price"
+ },
+ {
+  "query": "itemprop price 와 content 속성 넣는 방법",
+  "check": "price"
+ },
+ {
+  "query": "품절 상품을 에이전트가 추천하지 않게 하려면",
+  "check": "availability"
+ },
+ {
+  "query": "재고 있음 없음을 기계가 읽는 값으로 표시하는 방법",
+  "check": "availability"
+ },
+ {
+  "query": "InStock OutOfStock 값은 어디에 넣나요",
+  "check": "availability"
+ },
+ {
+  "query": "div 에 onclick 만 있어서 에이전트가 버튼으로 인식을 못 해요",
+  "check": "clickables"
+ },
+ {
+  "query": "span 클릭으로 페이지 이동하는 부분을 링크로 바꾸기",
+  "check": "clickables"
+ },
+ {
+  "query": "검색창과 장바구니 담기를 form 과 button 으로 구성하는 방법",
+  "check": "clickables"
+ },
+ {
+  "query": "입력창에 placeholder 만 있고 설명이 없어요",
+  "check": "labels"
+ },
+ {
+  "query": "수량과 옵션 select 에 label 을 다는 방법",
+  "check": "labels"
+ },
+ {
+  "query": "aria-label 로 검색 입력 요소의 용도를 알려주기",
+  "check": "labels"
+ },
+ {
+  "query": "페이지가 전부 div 라서 본문과 메뉴가 구분이 안 돼요",
+  "check": "landmarks"
+ },
+ {
+  "query": "header nav main footer 태그로 영역 나누기",
+  "check": "landmarks"
+ },
+ {
+  "query": "main 태그가 없을 때 에이전트가 본문을 못 찾아요",
+  "check": "landmarks"
+ },
+ {
+  "query": "h1 이 하나도 없고 상품명이 일반 div 로 되어 있어요",
+  "check": "headings"
+ },
+ {
+  "query": "제목 태그가 h1 에서 h3 로 건너뛰어요",
+  "check": "headings"
+ },
+ {
+  "query": "한 페이지에 h1 이 여러 개 있어요",
+  "check": "headings"
+ },
+ {
+  "query": "title 이 untitled 로 되어 있어요",
+  "check": "meta"
+ },
+ {
+  "query": "검색 결과와 미리보기에 쓰이는 description 과 og 태그 설정",
+  "check": "meta"
+ },
+ {
+  "query": "페이지마다 고유한 제목과 설명이 필요한 이유",
+  "check": "meta"
+ },
+ {
+  "query": "상품 이미지에 alt 속성이 비어 있어요",
+  "check": "alt"
+ },
+ {
+  "query": "에이전트가 이미지를 못 읽을 때 대체 텍스트를 어떻게 쓰나요",
+  "check": "alt"
+ },
+ {
+  "query": "장식용 이미지의 alt 는 어떻게 처리하나요",
+  "check": "alt"
+ },
+ {
+  "query": "봇이 사이트를 크롤링해도 되는지 알려주는 파일",
+  "check": "machine_files"
+ },
+ {
+  "query": "llms.txt 에 사이트 소개와 주요 페이지 목록 쓰기",
+  "check": "machine_files"
+ },
+ {
+  "query": "robots.txt 가 Disallow: / 로 전체 차단이면 어떻게 되나요",
+  "check": "machine_files"
+ },
+ {
+  "query": "상품 가격이 자바스크립트로만 채워져서 크롤러가 못 읽어요",
+  "check": "ssr"
+ },
+ {
+  "query": "서버 렌더링으로 상품명과 가격을 HTML 에 미리 넣는 방법",
+  "check": "ssr"
+ },
+ {
+  "query": "root 요소가 비어 있고 스크립트가 화면을 그리는 페이지",
+  "check": "ssr"
+ },
+ {
+  "query": "배송비와 도착 예정일을 에이전트가 비교할 수 있게 쓰려면",
+  "check": "policy"
+ },
+ {
+  "query": "반품 교환 가능 기간을 구조화 데이터로 알려주기",
+  "check": "policy"
+ },
+ {
+  "query": "판매자 비교에서 배송 정보가 없으면 불리한가요",
+  "check": "policy"
+ },
+ {
+  "query": "별점과 리뷰 개수를 aggregateRating 으로 넣는 방법",
+  "check": "reviews"
+ },
+ {
+  "query": "리뷰가 없으면 에이전트 추천에서 밀리나요",
+  "check": "reviews"
+ },
+ {
+  "query": "평점 숫자가 이미지로만 되어 있어요",
+  "check": "reviews"
+ },
+ {
+  "query": "화면에는 24900원인데 JSON-LD 에는 29900 으로 되어 있어요",
+  "check": "consistency"
+ },
+ {
+  "query": "상품 가격이 곳곳에서 서로 다르면 에이전트가 어떻게 판단하나요",
+  "check": "consistency"
+ },
+ {
+  "query": "JSON-LD 가격과 화면 가격을 하나의 데이터에서 만들기",
+  "check": "consistency"
+ },
+ {
+  "query": "첫 방문 시 전체 화면을 덮는 이벤트 팝업이 클릭을 막아요",
+  "check": "overlays"
+ },
+ {
+  "query": "쿠키 동의 배너와 모달 때문에 에이전트가 진행을 못 해요",
+  "check": "overlays"
+ },
+ {
+  "query": "팝업 닫기가 div onclick 뿐이라 닫을 수가 없어요",
+  "check": "overlays"
+ },
+ {
+  "query": "장바구니에서 로그인 후 주문하라고 나와서 에이전트가 멈춰요",
+  "check": "friction"
+ },
+ {
+  "query": "캡차가 있으면 자동 구매가 안 되나요",
+  "check": "friction"
+ },
+ {
+  "query": "비회원 구매 경로를 만들어 주세요",
+  "check": "friction"
+ }
+]
