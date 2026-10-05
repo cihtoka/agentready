@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+output/
+
+# 실제 LLM 응답 녹화본(실제 페이지 내용이 들어갈 수 있어 공개 저장소에는 올리지 않음)
+data/recordings/*.jsonl
